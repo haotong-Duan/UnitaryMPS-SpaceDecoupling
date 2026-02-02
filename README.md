@@ -81,3 +81,7 @@ This repository provides baseline implementations for unsupervised generative mo
 ## Citation
 
 If you use this code in your research, please cite the corresponding paper.
+
+---
+
+Authors:Haotong Duan, Zhongming Chen, Qingzhi Yang.
