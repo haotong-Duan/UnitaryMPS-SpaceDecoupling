@@ -1,0 +1,19 @@
+function X_new = low_rank_frobenius_step(X, E, r,alpha)
+    n = size(X,2);
+    [U, S, Vh] = svd(X, 'econ');
+    s = diag(S);
+    X_proj = U(:, 1:r) * diag(s(1:r)) * Vh(:, 1:r)';
+    X = X_proj / norm(X_proj, 'fro');
+    V = Vh(:, 1:r);
+    G = eye(n) - V * V';
+    [U1, s1, Vh1] = svd(X, 'econ');
+    H = U1(:,1:r) * diag(s1(1:r));
+    V1 = Vh1(:,1:r);
+    M_H = 2 * eye(r) + H' * H;
+    Vp = G * E' * H / M_H;
+    mid = E * V1;
+    K = mid - trace(H' * mid) * H;
+    V_tl = (V1 - alpha*Vp) / sqrtm(eye(r) + (alpha*Vp)'*(alpha*Vp));
+    X_retracted = ((H - alpha*K) / norm(H - alpha*K, 'fro')) * V_tl';
+    X_new = X_retracted;
+end
