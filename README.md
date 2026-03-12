@@ -1,10 +1,10 @@
-# Unitary Matrix Product States Using Riemannian Optimization (Code)
+# Efficient Generative Modeling with Unitary MPS Using Riemannian Optimization (Code)
 
 This repository provides the **MATLAB implementation** for the paper:
 
 **Efficient Generative Modeling with Unitary Matrix Product States Using Riemannian Optimization**
 
-The code implements a generative modeling framework based on **unitary Matrix Product States (MPS)** and **Riemannian optimization**, and is used for experiments on datasets including Bars and Stripes, and EMNIST (includes the MNIST dataset).
+The code implements a generative modeling framework based on **unitary Matrix Product States (MPS)** and **Riemannian optimization**, and is used for experiments on datasets including Bars and Stripes, and EMNIST (includes the MNIST dataset). Overall, our approach achieves substantially faster convergence—up to 27× higher efficiency compared with the original MPS-based generative model.
 
 ---
 
@@ -83,5 +83,6 @@ This repository provides baseline implementations for unsupervised generative mo
 If you use this code in your research, please cite the corresponding paper.
 
 ---
-
-Authors:Haotong Duan, Zhongming Chen, Ngai Wong.
+"Efficient Generative Modeling with Unitary Matrix Product States Using Riemannian Optimization"
+https://arxiv.org/abs/????
+Authors: Haotong Duan, Zhongming Chen, Ngai Wong.
