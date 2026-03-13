@@ -212,6 +212,7 @@ classdef UMPS_SD < handle
             schro.merged_tensor=reshape(schro.merged_tensor,2*Dl,2*Dr);
             min1 = min([schro.max_bondim,2*Dl,2*Dr]);
             schro.merged_tensor = low_rank_frobenius_step(schro.merged_tensor,gradient,min1,schro.learning_rate);
+            schro.merged_tensor = schro.merged_tensor / norm(reshape(schro.merged_tensor, Dl*2,Dr*2),'fro');
             schro.merged_tensor = reshape(schro.merged_tensor,size(gradient));
         end
 
@@ -371,4 +372,5 @@ classdef UMPS_SD < handle
                     end
                 end
 end
+
 
