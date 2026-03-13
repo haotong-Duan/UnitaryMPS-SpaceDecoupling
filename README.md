@@ -85,6 +85,6 @@ If you use this code in your research, please cite the corresponding paper.
 ---
 "Efficient Generative Modeling with Unitary Matrix Product States Using Riemannian Optimization"
 
-https://arxiv.org/abs/????
+https://arxiv.org/abs/2603.12026
 
 Authors: Haotong Duan, Zhongming Chen, Ngai Wong.
