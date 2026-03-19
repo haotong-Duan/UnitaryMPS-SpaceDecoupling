@@ -1,5 +1,5 @@
 clear,clc
-rng(1);clear mps;
+rng("shuffle");clear mps;
 n=784;m=100;k=392;% half part 
 Dmax=400; % max bond dimension
 n_batches=1;
@@ -20,4 +20,5 @@ mps.train(4); %loops
 %---
 z=test_x_binary(n-k+1:n,:);
 s=generate_sample_half(mps,z,size(test_x_binary,2))-1;
+
 figure_mnist(s,n-k); 
