@@ -48,6 +48,7 @@ classdef UMPS_SD < handle
             schro.tensors{n} = reshape(Q', d1, d2, d3);
             schro.ttrank(schro.n)=1;
             schro.ttrank(n-1)=schro.min_bondim;
+            schro.tensors{n} = schro.tensors{n} / norm(schro.tensors{n},'fro');
             schro.make_batches();
             schro.current_bond=1;
             schro.left_canonical();           
@@ -176,10 +177,9 @@ classdef UMPS_SD < handle
                 Dl = schro.ttrank(schro.current_bond - 1);
                 Dr = schro.ttrank(schro.current_bond + 1);
             end
-            
             nominator = zeros(Dl, Dr, schro.batch_size);
             for i = 1:schro.batch_size
-                idx = schro.batch_idx(i, batch); 
+                idx = schro.batch_idx(i, batch);  
                 sample = schro.data(:, idx);
                 lvec = schro.cumulants{schro.current_bond}(idx, :);  % 1*Dl
                 rvec = schro.cumulants{schro.current_bond + 1}(idx, :); % 1*Dr
@@ -188,32 +188,32 @@ classdef UMPS_SD < handle
                 schro.psi(idx) = lvec * tmp * rvec';  
             end
             
-            data_idx = schro.batch_idx(:, batch); 
+            data_idx = schro.batch_idx(:, batch);  
             samples = schro.data(:, data_idx);
             gradient = zeros(Dl,2,2,Dr);
-            for si = 1:2
-                for sj = 1:2
-                    idx = logical((samples(schro.current_bond, :) == si) .* (samples(schro.current_bond + 1, :) == sj));  
-                    a = nominator(:, :, idx);
-                    b = schro.psi(data_idx(idx));
-                    
-                    % compute gradient
-                    if (size(a, 3) == 0)
-                        gradient(:,si,sj,:) = -2 * schro.merged_tensor(:, si, sj, :);  
+            grad_mid = cell(2,2);
+            for si=1:2
+                for sj=1:2
+                    idx = logical( (samples(schro.current_bond,:) == si ) .* (samples(schro.current_bond+1,:)==sj) ); 
+                    a=nominator(:,:,idx);
+                    b=schro.psi(data_idx(idx));
+                    grad_mid{si,sj}=zeros(Dl,Dr);
+                    if(size(a,3)==0) 
+                        grad_mid{si,sj}=-2*schro.merged_tensor(:,si,sj,:);
                     else
-                        for i = 1:size(a, 3)
-                            gradient(:,si,sj,:) = gradient(:,si,sj,:) + reshape(a(:, :, i),[Dl,1,1,Dr]) ./ b(i) * 2;
+                        for i=1:size(a,3)
+                            grad_mid{si,sj}=grad_mid{si,sj}+a(:,:,i)./b(i)*2;
                         end
-                        gradient(:,si,sj,:)= reshape(gradient(:,si,sj,:) ./ schro.batch_size, size(schro.merged_tensor(:, si, sj, :))) - 2 * schro.merged_tensor(:, si, sj, :);
-                    end            
+                    end
+                    gradient(:,si,sj,:) = grad_mid{si,sj};
                 end
             end
             gradient = reshape(gradient,2*Dl,2*Dr);
             schro.merged_tensor=reshape(schro.merged_tensor,2*Dl,2*Dr);
             min1 = min([schro.max_bondim,2*Dl,2*Dr]);
-            schro.merged_tensor = low_rank_frobenius_step(schro.merged_tensor,gradient,min1,schro.learning_rate);
-            schro.merged_tensor = schro.merged_tensor / norm(reshape(schro.merged_tensor, Dl*2,Dr*2),'fro');
-            schro.merged_tensor = reshape(schro.merged_tensor,size(gradient));
+            schro.merged_tensor = low_rank_frobenius_step_test(schro.merged_tensor,gradient,min1,schro.learning_rate);
+            schro.merged_tensor = schro.merged_tensor/norm(reshape(schro.merged_tensor,Dl*2,Dr*2),'fro');
+            schro.merged_tensor = reshape(schro.merged_tensor,[Dl,2,2,Dr]);
         end
 
         
@@ -372,5 +372,6 @@ classdef UMPS_SD < handle
                     end
                 end
 end
+
 
 
