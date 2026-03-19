@@ -1,5 +1,5 @@
 clear,clc
-rng(1);clear mps;
+rng("shuffle");clear mps;
 n=256;k=128;
 Dmax=500; 
 n_batches=1; 
@@ -16,4 +16,5 @@ mps.train(5);
 % z=test_x_binary(n-k+1:n,:);
 % s=generate_sample_half(mps,z,size(test_x_binary,2))-1;
 % figure_bas(s,n-k,sqrt(n));
+
 
