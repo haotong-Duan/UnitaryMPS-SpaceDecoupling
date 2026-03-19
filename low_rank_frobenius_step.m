@@ -1,4 +1,4 @@
-function X_new = low_rank_frobenius_step_test(X, E, r,alpha)
+function X_new = low_rank_frobenius_step(X, E, r,alpha)
     n = size(X,2);
     E = E - trace(X' * E) * X;
     [U, S, Vh] = svd(X, 'econ');
@@ -22,3 +22,4 @@ function X_new = low_rank_frobenius_step_test(X, E, r,alpha)
     X_new = X_retracted;
     %G_new = G_retracted;
 end
+
