@@ -7,7 +7,7 @@ n_batches=1;
 load('bars_stripes_16_1000.mat'); 
 mps=UMPS_SD(n,train_x_binary(:,1:400),n_batches);
 mps.max_bondim=Dmax;
-mps.learning_rate=0.007;
+mps.learning_rate=2.8; 
 mps.train(5); 
 % gener=generate_sample(mps,20);
 % figure_bas(gener,sqrt(n),size(gener,2));

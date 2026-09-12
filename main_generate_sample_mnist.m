@@ -8,7 +8,7 @@ load('mnist_images.mat');     %emnist
 load('mnist_test_images.mat');   %emnist
 mps=UMPS_SD(n,train_x_binary,n_batches);
 mps.max_bondim=Dmax;
-mps.learning_rate=0.001; % often 0.001
+mps.learning_rate=0.1; 
 mps.train(4); %loops
 % 
 % Generate directly

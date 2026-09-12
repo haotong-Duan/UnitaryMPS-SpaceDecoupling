@@ -19,7 +19,8 @@ classdef UMPS_SD < handle
         psi = [];           
         log_file = '';      
         converge_crit = 0.002; 
-        nll_history = [];   
+        nll_history = [];
+        time_history = [];
     end
     
     methods
@@ -132,7 +133,7 @@ classdef UMPS_SD < handle
                 nll_old=nll_new;
                 nll_new=schro.compute_nll();
                 fprintf('/%d <nll>=%.3f, <max_ttrank>=%d, <mean of ttranks>=%.4f\n',loop,nll_new,max(schro.ttrank),mean(schro.ttrank));
-                toc;
+                schro.time_history(loop)=toc;
                 schro.nll_history(loop)=nll_new;
                 if(~isempty(schro.log_file))
                     fprintf('saving to %s\n',schro.log_file);
@@ -166,7 +167,42 @@ classdef UMPS_SD < handle
            schro.cumulants{schro.n}=ones(schro.m,1);
         end
                 
-        function gradient_descent(schro, batch)               
+        function gradient_descent(schro, batch)
+            [Dl, Dr] = schro.bond_dims();
+            B = schro.batch_size;
+            data_idx = schro.batch_idx(:, batch);
+            sk  = schro.data(schro.current_bond, data_idx);
+            sk1 = schro.data(schro.current_bond + 1, data_idx);
+            L = schro.cumulants{schro.current_bond}(data_idx, :);
+            R = schro.cumulants{schro.current_bond + 1}(data_idx, :);
+
+            % reshape((Dl,2,2,Dr) -> (2Dl,2Dr)) maps entry (a,sk,sk1,b) to
+            % row = a + Dl*(sk-1), col = sk1 + 2*(b-1), hence Psi_i = P(i,:)*X*Q(i,:)'
+            P = zeros(B, 2 * Dl);
+            Q = zeros(B, 2 * Dr);
+            colsQ = 2 * ((1:Dr) - 1);
+            for i = 1:B
+                P(i, (1:Dl) + Dl * (sk(i) - 1)) = L(i, :);
+                Q(i, sk1(i) + colsQ)            = R(i, :);
+            end
+
+            X = reshape(schro.merged_tensor, 2 * Dl, 2 * Dr);
+            r = min([schro.max_bondim, 2 * Dl, 2 * Dr]);
+
+            psi_cur = sum((P * X) .* Q, 2);
+            % Euclidean gradient of f(X) = -(1/B)*sum_i log((P_i X Q_i')^2).
+            % The term Z' = 2X is radial and is removed by the sphere
+            % projection inside low_rank_frobenius_step, so it is omitted.
+            gradF = -(2 / B) * (P' * (Q ./ psi_cur));
+
+            X = low_rank_frobenius_step(X, gradF, r, schro.learning_rate);
+            X = X / norm(X, 'fro');
+
+            schro.psi(data_idx) = sum((P * X) .* Q, 2);
+            schro.merged_tensor = reshape(X, [Dl, 2, 2, Dr]);
+        end
+
+        function [Dl, Dr] = bond_dims(schro)
             if (schro.current_bond == 1)
                 Dl = 1;
                 Dr = schro.ttrank(schro.current_bond + 1);
@@ -177,46 +213,8 @@ classdef UMPS_SD < handle
                 Dl = schro.ttrank(schro.current_bond - 1);
                 Dr = schro.ttrank(schro.current_bond + 1);
             end
-            nominator = zeros(Dl, Dr, schro.batch_size);
-            for i = 1:schro.batch_size
-                idx = schro.batch_idx(i, batch);  
-                sample = schro.data(:, idx);
-                lvec = schro.cumulants{schro.current_bond}(idx, :);  % 1*Dl
-                rvec = schro.cumulants{schro.current_bond + 1}(idx, :); % 1*Dr
-                nominator(:, :, i) = lvec' * rvec;
-                tmp = reshape(schro.merged_tensor(:, sample(schro.current_bond), sample(schro.current_bond + 1), :), Dl, Dr);
-                schro.psi(idx) = lvec * tmp * rvec';  
-            end
-            
-            data_idx = schro.batch_idx(:, batch);  
-            samples = schro.data(:, data_idx);
-            gradient = zeros(Dl,2,2,Dr);
-            grad_mid = cell(2,2);
-            for si=1:2
-                for sj=1:2
-                    idx = logical( (samples(schro.current_bond,:) == si ) .* (samples(schro.current_bond+1,:)==sj) ); 
-                    a=nominator(:,:,idx);
-                    b=schro.psi(data_idx(idx));
-                    grad_mid{si,sj}=zeros(Dl,Dr);
-                    if(size(a,3)==0) 
-                        grad_mid{si,sj}=-2*schro.merged_tensor(:,si,sj,:);
-                    else
-                        for i=1:size(a,3)
-                            grad_mid{si,sj}=grad_mid{si,sj}+a(:,:,i)./b(i)*2;
-                        end
-                    end
-                    gradient(:,si,sj,:) = grad_mid{si,sj};
-                end
-            end
-            gradient = reshape(gradient,2*Dl,2*Dr);
-            schro.merged_tensor=reshape(schro.merged_tensor,2*Dl,2*Dr);
-            min1 = min([schro.max_bondim,2*Dl,2*Dr]);
-            schro.merged_tensor = low_rank_frobenius_step(schro.merged_tensor,gradient,min1,schro.learning_rate);
-            schro.merged_tensor = schro.merged_tensor/norm(reshape(schro.merged_tensor,Dl*2,Dr*2),'fro');
-            schro.merged_tensor = reshape(schro.merged_tensor,[Dl,2,2,Dr]);
         end
 
-        
         function update_cumulants(schro)
             if((schro.current_bond==1 && (~schro.going_right)) || (schro.current_bond==schro.n-1 && schro.going_right))
                 return
