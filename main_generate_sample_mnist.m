@@ -1,14 +1,14 @@
 clear,clc
 rng("shuffle");clear mps;
 n=784;m=100;k=392;% half part 
-Dmax=400; % max bond dimension
+Dmax=200; % max bond dimension
 n_batches=1;
-% Run 'addpath' for datasets
+% Run 'addpath' for datasets (addpath('datasets_test/','figure_/'))
 load('mnist_images.mat');     %emnist    
 load('mnist_test_images.mat');   %emnist
 mps=UMPS_SD(n,train_x_binary,n_batches);
 mps.max_bondim=Dmax;
-mps.learning_rate=0.1; 
+mps.learning_rate=0.007; 
 mps.train(4); %loops
 % 
 % Generate directly

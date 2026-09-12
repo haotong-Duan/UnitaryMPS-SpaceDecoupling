@@ -132,8 +132,10 @@ classdef UMPS_SD < handle
                 end
                 nll_old=nll_new;
                 nll_new=schro.compute_nll();
-                fprintf('/%d <nll>=%.3f, <max_ttrank>=%d, <mean of ttranks>=%.4f\n',loop,nll_new,max(schro.ttrank),mean(schro.ttrank));
                 schro.time_history(loop)=toc;
+                fprintf('/%d <nll>=%.3f, <max_ttrank>=%d, <mean of ttranks>=%.4f, <time>=%.2fs, <total>=%.2fs\n', ...
+                loop,nll_new,max(schro.ttrank),mean(schro.ttrank), ...
+                schro.time_history(loop),sum(schro.time_history));
                 schro.nll_history(loop)=nll_new;
                 if(~isempty(schro.log_file))
                     fprintf('saving to %s\n',schro.log_file);
@@ -148,6 +150,8 @@ classdef UMPS_SD < handle
                     break;
                 end
             end
+            fprintf('total: %d loops, %.2f s\n', ...
+                    numel(schro.time_history), sum(schro.time_history));
         end
         
         function init_cumulants(schro)

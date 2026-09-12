@@ -1,11 +1,11 @@
 clear,clc
 rng("shuffle");clear mps;
 n=784;m=100;k=392;% half part
-Dmax=400; % max bond dimension
+Dmax=200; % max bond dimension
 n_batches=1;
-% Run 'addpath' for datasets, figure and linesearch
-load('mnist_images.mat');     %emnist
-load('mnist_test_images.mat');   %emnist
+% Run 'addpath' for datasets, figure and linesearch (addpath(genpath('..'));)
+load('mnist_images_ls.mat');     %emnist
+load('mnist_test_images_ls.mat');   %emnist
 mps=UMPS_LS(n,train_x_binary,n_batches);
 mps.max_bondim=Dmax;
 % no learning rate: the step size is chosen by Armijo backtracking
