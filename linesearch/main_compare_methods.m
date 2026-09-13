@@ -1,6 +1,6 @@
 clear,clc
 % initial MPS. Run 'addpath' for datasets, figure and linesearch.
-n=784;Dmax=400;n_batches=1;n_loops=4;n_train=100;seed=2024;
+n=784;Dmax=200;n_batches=1;n_loops=3;n_train=100;seed=2024;
 lr=0.1; 
 load('mnist_images.mat');
 data=train_x_binary(:,1:n_train);

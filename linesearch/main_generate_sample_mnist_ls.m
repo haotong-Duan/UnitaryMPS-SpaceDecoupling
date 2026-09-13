@@ -13,7 +13,7 @@ mps.ls_alpha=1;
 mps.ls_beta=0.5;
 mps.ls_c=1e-4;
 mps.ls_maxback=30;
-mps.train(4); %loops
+mps.train(5); %loops
 %
 % Generate directly
 %---

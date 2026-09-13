@@ -26,5 +26,5 @@ function figure_mnist(s, k)
     end
 set(gcf, 'PaperUnits', 'inches');
 set(gcf, 'PaperPositionMode', 'auto');
-exportgraphics(gcf, 'figure_generate_given_q.pdf', 'ContentType', 'vector');
+exportgraphics(gcf, 'Generate_Image.pdf', 'ContentType', 'vector');
 end    
