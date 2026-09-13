@@ -14,7 +14,7 @@ rng(2);
 n = 784; k = 392;
 Dmax = 200;
 n_batches = 1;
-BITS = [8];
+BITS = [2 3 4 5 6 8];
 L = 1024;
 N_SHOW = 20;          
 
